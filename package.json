@@ -1,0 +1,32 @@
+{
+	"name": "eizen",
+	"version": "1.0.0",
+	"description": "Vector database backend lib for ArchiveNet",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsdown",
+		"test": "vitest",
+		"test:ui": "vite --ui",
+		"coverage": "vitest run --coverage",
+		"dev": "tsx src/index.ts",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"check:ci": "biome check ."
+	},
+	"keywords": [],
+	"author": "Agasta",
+	"license": "ISC",
+	"packageManager": "pnpm@10.11.0",
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@tsconfig/node23": "^23.0.2",
+		"@types/node": "^22.15.21",
+		"@vitest/coverage-v8": "^3.1.4",
+		"@vitest/ui": "^3.1.4",
+		"tsdown": "^0.12.4",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.4"
+	}
+}
