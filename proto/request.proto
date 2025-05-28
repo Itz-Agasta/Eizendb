@@ -1,0 +1,15 @@
+// API request/response message definitions
+syntax = "proto3";
+
+package request_buffer;
+
+// Single vector with optional metadata
+message Singleton {
+  repeated float v = 1;
+  map<string, string> metadata = 2;
+}
+
+// Collection of string identifiers for batch operations
+message Batch {
+  repeated string b = 1;
+}

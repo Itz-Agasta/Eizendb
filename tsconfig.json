@@ -1,15 +1,14 @@
 {
 	"extends": "@tsconfig/node23/tsconfig.json",
 	"compilerOptions": {
+        "lib": ["ESNext"],
+        "module": "esnext",
+        "moduleResolution": "node",
 		"allowJs": true,
 		"sourceMap": true,
-		"outDir": "./dist",
+		"outDir": "./lib",
 		"rootDir": "./src",
-		"baseUrl": "./src",
-		"paths": {
-			"*": ["*", "types/*"]
-		}
 	},
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "**/*.spec.ts"]
+	"exclude": ["node_modules"]
 }
