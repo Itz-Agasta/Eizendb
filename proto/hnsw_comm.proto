@@ -1,0 +1,24 @@
+// Data structures for HNSW (Hierarchical Navigable Small World) index communication
+syntax = "proto3";
+
+package index_buffer;
+
+// Represents a node in a specific layer of the HNSW graph
+message LayerNode {
+  uint32 level = 1;   
+  uint32 idx = 2; 
+  bool visible = 3;
+  map<uint32, float> neighbors = 4; // neighbor_id -> distance
+}
+
+// Vector point with floating-point components
+message Point {
+  uint32 idx = 1; 
+  repeated float v = 2;
+}
+
+// Vector point with quantized (integer) components
+message PointQuant {
+  uint32 idx = 1; 
+  repeated uint32 v = 2; 
+}
