@@ -7,7 +7,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["proto/*.js", "proto/*.d.ts", "lib/**", "node_modules/**"]
+		"ignore": [
+			"proto/*.js",
+			"proto/*.d.ts",
+			"lib/**",
+			"node_modules/**",
+			"test/data/**"
+		],
+		"maxSize": 2097152
 	},
 	"formatter": {
 		"enabled": true,
