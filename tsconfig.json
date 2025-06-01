@@ -7,8 +7,8 @@
 		"allowJs": true,
 		"sourceMap": true,
 		"outDir": "./lib",
-		"rootDir": "./src"
+		"types": ["vitest/globals"]
 	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules"]
+	"include": ["src/**/*", "test/**/*"],
+	"exclude": ["node_modules", "test/data/*.js"]
 }

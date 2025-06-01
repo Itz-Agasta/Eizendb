@@ -31,13 +31,17 @@ node_modules
 # Optional npm cache directory
 .npm
 
-# Optional REPL history
-.node_repl_history
 
 typings/
 lib/*.js
 test/*.js
 *.map
 
+# Testing
+dump.rdb
+logs
+
 # project
 lib/
+.vscode/mcp.json
+coverage/
