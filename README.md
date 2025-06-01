@@ -6,12 +6,12 @@ Eizen is a high-performance vector database backend built on Arweave that implem
 
 ## Key Features
 
-- **🚀 HNSW Algorithm**: State-of-the-art approximate nearest neighbor search with O(log N) complexity
-- **🔗 Blockchain Storage**: Persistent vector storage on Arweave with HollowDB integration
-- **📦 Protobuf Encoding**: Efficient serialization for optimal storage and network transfer
-- **🏷️ Metadata Support**: Rich metadata attachment to vectors for enhanced search capabilities
-- **🔧 Flexible Interface**: Database-agnostic interface supporting multiple storage backends
-- **📈 Scalable**: Handles millions of high-dimensional vectors efficiently
+- **HNSW Algorithm**: State-of-the-art approximate nearest neighbor search with O(log N) complexity
+- **Blockchain Storage**: Persistent vector storage on Arweave with HollowDB integration
+- **Protobuf Encoding**: Efficient serialization for optimal storage and network transfer
+- **Metadata Support**: Rich metadata attachment to vectors for enhanced search capabilities
+- **Flexible Interface**: Database-agnostic interface supporting multiple storage backends
+- **Scalable**: Handles millions of high-dimensional vectors efficiently
 
 ## HNSW Implementation
 
@@ -120,22 +120,55 @@ console.log(results);
 
 ## Development
 
-### Running Tests
+### Testing
+
+The project includes comprehensive tests covering different aspects:
 
 ```bash
-pnpm test
+# Run all tests (local development)
+npm run test:local
+
+# Run tests for CI (excludes Python tests)
+npm run test:ci
+
+# Run only TypeScript tests
+npm test
+
+# Run specific test suites
+npm run test:heap     # Heap data structure tests
+npm run test:hnsw     # Core HNSW algorithm tests
+npm run test:proto    # Protocol buffer serialization tests
+npm run test:eizen    # Full blockchain integration tests
+
+# Run Python reference implementation
+npm run test:python # After setting up the python env.
 ```
 
-### Type Checking
+#### Test Structure
+
+- **`test/heap.test.ts`**: Tests the heap data structure used in HNSW
+- **`test/proto.test.ts`**: Tests Protocol Buffer serialization
+- **`test/hnsw.test.ts`**: Tests the core HNSW algorithm with different storage backends
+- **`test/eizen.test.ts`**: Integration tests with Arweave blockchain and Redis
+- **`test/python.test.ts`**: Python reference implementation validation (skipped in CI)
+
+#### Python Reference Implementation
+
+The `test/python/` directory contains a Python implementation of the HNSW algorithm that serves as the ground truth for validation. This requires Python and `uv` to be installed:
 
 ```bash
-pnpm type-check
+# Setup Python environment (one-time)
+cd test/python
+uv sync
+
+# Run Python reference implementation
+uv run main.py
 ```
 
-### Linting
+**Note**: For some reason `Arlocal` doest work with `pnpm`, so the `eizen.test.ts` will fail. Thats why for testing `npm` is recommended. If you are using pnpm run:
 
 ```bash
-pnpm lint
+pnpm run use-npm
 ```
 
 ## Architecture
@@ -157,7 +190,6 @@ src/
 
 - [HNSW Paper](https://arxiv.org/pdf/1603.09320.pdf): "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs" by Malkov & Yashunin
 - [Arweave](https://www.arweave.org/): Permanent data storage blockchain
-- [HollowDB](https://github.com/firstbatchxyz/hollowdb): Key-value database on Arweave
 
 ## Contributing
 
@@ -178,4 +210,4 @@ We welcome contributions! Please see our contributing guidelines:
 
 ## License
 
-This project is licensed under the ISC License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
