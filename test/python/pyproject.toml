@@ -1,0 +1,7 @@
+[project]
+name = "python"
+version = "0.1.0"
+description = "Python implementation of the HNSW algorithm that serves as the ground truth for validation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2.2.6"]
