@@ -75,7 +75,7 @@ export class EizenCompatSDK extends SetSDK<string> {
  * const results = await vectorDb.knn_search([0.15, 0.25, 0.35], 5);
  * ```
  */
-export default class EizenDbVector<M = unknown> extends HNSW<M> {
+export class EizenDbVector<M = unknown> extends HNSW<M> {
 	/** Database SDK instance for persistent storage operations */
 	sdk: SetSDK<string>;
 
