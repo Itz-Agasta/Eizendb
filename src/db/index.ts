@@ -27,7 +27,7 @@ export class EizenMemory<M = unknown> implements DBInterface<M> {
 	client: SetSDK<string>;
 
 	/**
-	 * Deploy a new HollowDB contract for this database instance
+	 * Deploy a new contract for this database instance
 	 *
 	 * @param initialState - Initial state configuration for the contract
 	 * @param source - ( Optional) source transaction ID for contract deployment
@@ -324,7 +324,7 @@ export class EizenMemory<M = unknown> implements DBInterface<M> {
 	/**
 	 * Safely retrieve multiple keys with automatic request splitting
 	 *
-	 * HollowDB has transaction size limits. This method automatically splits
+	 * Base-DB has transaction size limits. This method automatically splits
 	 * large requests into smaller chunks when the limit is exceeded.
 	 * Uses recursive binary splitting on errors.
 	 */
