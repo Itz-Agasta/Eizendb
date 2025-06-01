@@ -1,0 +1,44 @@
+# Development files
+src/
+test/
+coverage/
+docs/
+
+# Config files
+tsconfig.json
+tsdown.config.ts
+vitest.config.ts
+biome.json
+
+# Build artifacts (keep lib/ for distribution)
+*.log
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package managers
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Redis
+dump.rdb
+
+# Logs
+logs/
+*.log
