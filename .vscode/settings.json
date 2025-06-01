@@ -1,5 +1,6 @@
 {
 	"cSpell.words": [
+		"arlocal",
 		"Arweave",
 		"datas",
 		"datasize",
@@ -7,17 +8,26 @@
 		"eizen",
 		"Eizendb",
 		"elems",
+		"groth",
 		"hollowdb",
 		"idxs",
+		"jscoverage",
+		"kvdb",
 		"Malkov",
 		"mdist",
 		"metadatas",
+		"numpy",
 		"Parallelizable",
 		"pbjs",
 		"pbts",
+		"pids",
+		"psignals",
+		"ripemd",
 		"topk",
 		"tsdown",
 		"usize",
+		"vectordb",
+		"wscript",
 		"Yashunin"
 	]
 }
