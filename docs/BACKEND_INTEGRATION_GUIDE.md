@@ -79,7 +79,11 @@ export class VectorService {
       throw new Error("Document must include embedding vector");
     }
 
-    await this.vectorDb.insert(document.embedding, document);
+    try {
+      await this.vectorDb.insert(document.embedding, document);
+    } catch (error) {
+      throw new Error(`Failed to add document: ${error.message}`);
+    }
   }
 
   async searchSimilar(
@@ -89,29 +93,36 @@ export class VectorService {
   ): Promise<Array<VectorDocument & { similarity: number }>> {
     await this.ensureInitialized();
 
-    const results = await this.vectorDb.knn_search(query, limit * 2);
+    try {
+      const results = await this.vectorDb.knn_search(query, limit * 2);
 
-    let filteredResults = results;
+      let filteredResults = results;
 
-    // Apply filters if provided
-    if (filters) {
-      filteredResults = results.filter((result) => {
-        if (!result.metadata) return false;
+      // Apply filters if provided
+      if (filters) {
+        filteredResults = results.filter((result) => {
+          if (!result.metadata) return false;
 
-        return Object.entries(filters).every(([key, value]) => {
-          const metadataValue = result.metadata[key];
-          if (Array.isArray(value)) {
-            return value.includes(metadataValue);
-          }
-          return metadataValue === value;
+          return Object.entries(filters).every(([key, value]) => {
+            const metadataValue = result.metadata[key];
+            if (Array.isArray(value)) {
+              return value.includes(metadataValue);
+            }
+            return metadataValue === value;
+          });
         });
-      });
-    }
+      }
 
-    return filteredResults.slice(0, limit).map((result) => ({
-      ...result.metadata!,
-      similarity: 1 - result.distance,
-    }));
+      return filteredResults.slice(0, limit).map((result) => ({
+        id: result.id,
+        content: result.metadata?.content || "",
+        metadata: result.metadata || {},
+        embedding: undefined, // Not included in search results for performance
+        similarity: 1 - result.distance, // Assumes cosine distance [0,2] -> similarity [1,-1]
+      }));
+    } catch (error) {
+      throw new Error(`Search failed: ${error.message}`);
+    }
   }
 
   async getDocument(id: string): Promise<VectorDocument | null> {
@@ -217,6 +228,11 @@ export class VectorRepository {
 }
 
 // src/services/DocumentService.ts
+// Helper function for ID generation
+function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
 export class DocumentService {
   constructor(
     private vectorRepository: VectorRepository,
@@ -291,6 +307,11 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+
+// Helper function to load wallet
+function loadWallet() {
+  return JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
+}
 
 // Initialize services
 const vectorService = new VectorService({

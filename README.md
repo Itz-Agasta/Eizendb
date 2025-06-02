@@ -1,8 +1,8 @@
-# Eizen - HNSW Vector Database on Arweave
+# Eizen - HNSW Vector Database Engine for ArchiveNET
 
 ## Overview
 
-Eizen is a high-performance vector database backend built on Arweave that implements the Hierarchical Navigable Small Worlds (HNSW) algorithm for approximate nearest neighbor search. It provides efficient vector storage, similarity search, and metadata management with blockchain-based persistence.
+Eizen is a high-performance vector database engine for ArchiveNET built on Arweave that implements the Hierarchical Navigable Small Worlds (HNSW) algorithm for approximate nearest neighbor search. It provides efficient vector storage, similarity search, and metadata management with blockchain-based persistence.
 
 ## Key Features
 
@@ -51,40 +51,112 @@ Mathematical operations and data structures:
 - Priority queues for search algorithms
 - Vector operations (dot product, norm)
 
-### Usage Example
+## Usage
+
+You can create the VectorDB as follows:
 
 ```typescript
-import { HNSW } from "./src/hnsw";
-import { EizenMemory } from "./src/db";
+import { EizenDbVector } from "eizen";
+import { WarpFactory, defaultCacheOptions } from "warp-contracts";
+import { SetSDK } from "hollowdb";
+import { Redis } from "ioredis";
+import { RedisCache } from "warp-contracts-redis";
+import { readFileSync } from "fs";
 
-// Initialize database and HNSW index
-const database = new EizenMemory();
-const hnsw = new HNSW(
-  database,
-  16, // M: connections per node
-  200, // ef_construction: build quality
-  50 // ef_search: search quality
+// connect to Redis
+const redis = new Redis();
+
+// create Warp instance with Redis cache
+const warp = WarpFactory.forMainnet().useKVStorageFactory(
+  (contractTxId: string) =>
+    new RedisCache(
+      { ...defaultCacheOptions, dbLocation: `${contractTxId}` },
+      { client: redis }
+    )
 );
 
-// Insert vectors with metadata
-await hnsw.insert([0.1, 0.2, 0.3, 0.4], {
-  filename: "document.pdf",
-  category: "research",
-});
+// create HollowDB SDK
+const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
+const contractTxId = "your-contract-tx-id";
+const hollowdb = new SetSDK<string>(wallet, contractTxId, warp);
 
-// Search for similar vectors
-const results = await hnsw.knn_search([0.15, 0.25, 0.35, 0.45], 5);
-console.log(results);
-// Output: [{ id: 0, distance: 0.1, metadata: { ... } }, ...]
+// create Eizen Vector with advanced HNSW parameters
+const vectordb = new EizenDbVector(hollowdb, {
+  m: 16, // connections per node (default: 5)
+  efConstruction: 200, // build quality (default: 128)
+  efSearch: 50, // search quality (default: 20)
+});
+```
+
+### Inserting a Vector
+
+With this, you can insert a new point:
+
+```typescript
+const point = [
+  -0.28571999073028564 /* and many more... */, 0.13964000344276428,
+];
+
+// any object
+const metadata = {
+  name: "My favorite vector!",
+  category: "research",
+  filename: "document.pdf",
+};
+
+// insert a point
+await vectordb.insert(point, metadata);
+```
+
+Metadata is optional, and you can leave it out during insert.
+
+> [!NOTE]
+> The complexity of inserting a point may increase with more points in the DB.
+
+### Fetching a Vector
+
+You can get a vector by its index, which returns its point value and metadata:
+
+```typescript
+const { point, metadata } = await vectordb.get_vector(index);
+```
+
+### Querying a Vector
+
+You can make a query and return top K relevant results:
+
+```typescript
+// a query point
+const query = [
+  -0.28571999073028564 /* and many more... */, 0.13964000344276428,
+];
+
+// number of top results to return
+const K = 10;
+
+// make a KNN search
+const results = await vectordb.knn_search(query, K);
+
+// each result contains the vector id, its distance to query, and metadata
+const { id, distance, metadata } = results[0];
+```
+
+### Deploying your own Contract
+
+Eizen Vector exports a static function that allows you two deploy a new contract that you own. Assuming that you have a wallet and a warp instance as described above, you can create a new contract with:
+
+```typescript
+const { contractTxId } = await EizenDbVector.deploy(wallet, warp);
+console.log("Deployed at:", contractTxId);
 ```
 
 ### Parameter Tuning Guide
 
 | Parameter           | Purpose                    | Recommended Range      | Impact                                |
 | ------------------- | -------------------------- | ---------------------- | ------------------------------------- |
-| **M**               | Connections per node       | 5-48 (default: 16)     | Higher = better quality, more memory  |
-| **ef_construction** | Build candidate list size  | 100-400 (default: 200) | Higher = better graph, slower build   |
-| **ef_search**       | Search candidate list size | >= K (default: 50)     | Higher = better recall, slower search |
+| **M**               | Connections per node       | 5-48 (default: 5)      | Higher = better quality, more memory  |
+| **ef_construction** | Build candidate list size  | 100-400 (default: 128) | Higher = better graph, slower build   |
+| **ef_search**       | Search candidate list size | >= K (default: 20)     | Higher = better recall, slower search |
 
 ### Performance Characteristics
 
@@ -94,6 +166,90 @@ console.log(results);
 - **Distance Function**: Currently uses cosine distance (configurable)
 
 ## Installation
+
+Install the package from npm:
+
+```bash
+npm install eizen
+```
+
+## Advanced Examples
+
+### Vector Database with Express.js Backend
+
+```typescript
+import express from "express";
+import { EizenDbVector } from "eizen";
+import { SetSDK } from "hollowdb";
+import { WarpFactory } from "warp-contracts";
+import { readFileSync } from "fs";
+
+const app = express();
+app.use(express.json());
+
+// Initialize vector database with blockchain storage
+const warp = WarpFactory.forMainnet(); // or forTestnet() for testing
+
+// Load your Arweave wallet (choose one method):
+// Option 1: From file
+const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
+// Option 2: Generate new wallet
+// const wallet = await warp.arweave.wallets.generate();
+
+const contractTxId = "your-contract-transaction-id";
+const sdk = new SetSDK<string>(wallet, contractTxId, warp);
+
+const db = new EizenDbVector(sdk);
+
+// Add vector endpoint
+app.post("/vectors", async (req, res) => {
+  const { vector, metadata } = req.body;
+  await db.insert(vector, metadata);
+  res.json({ success: true });
+});
+
+// Search vectors endpoint
+app.get("/search", async (req, res) => {
+  const { vector, k = 10 } = req.query;
+  const results = await db.knn_search(JSON.parse(vector as string), Number(k));
+  res.json(results);
+});
+
+app.listen(3000, () => {
+  console.log("Vector database server running on port 3000");
+});
+```
+
+### Production Deployment with Arweave Backend
+
+```typescript
+import { EizenDbVector } from "eizen";
+import { SetSDK } from "hollowdb";
+import { WarpFactory } from "warp-contracts";
+import { readFileSync } from "fs";
+
+// Connect to existing contract
+const warp = WarpFactory.forMainnet(); // or forTestnet()
+
+// Load your Arweave wallet
+const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
+
+const contractTxId = "your-contract-transaction-id";
+const sdk = new SetSDK<string>(wallet, contractTxId, warp);
+
+// Initialize with Arweave backend
+const db = new EizenDbVector(sdk);
+
+// Insert vectors with blockchain persistence
+await db.insert([0.1, 0.2, 0.3], { id: "doc1", title: "Document 1" });
+await db.insert([0.4, 0.5, 0.6], { id: "doc2", title: "Document 2" });
+
+// Search for similar vectors
+const results = await db.knn_search([0.1, 0.2, 0.35], 5);
+console.log("Similar documents:", results);
+```
+
+## Installation (Development)
 
 1. Clone the repository:
 
@@ -115,7 +271,7 @@ console.log(results);
 
 4. Build the project:
    ```bash
-   pnpm build
+   pnpm run build
    ```
 
 ## Development
@@ -142,6 +298,11 @@ npm run test:eizen    # Full blockchain integration tests
 
 # Run Python reference implementation
 npm run test:python # After setting up the python env.
+
+# Additional development commands
+npm run test:ui       # Interactive test UI
+npm run coverage      # Generate test coverage report
+npm run check         # Code formatting and linting
 ```
 
 #### Test Structure
@@ -165,7 +326,7 @@ uv sync
 uv run main.py
 ```
 
-**Note**: For some reason `Arlocal` doest work with `pnpm`, so the `eizen.test.ts` will fail. Thats why for testing `npm` is recommended. If you are using pnpm run:
+**Note**: For some reason `ArLocal` doesn't work with `pnpm`, so the `eizen.test.ts` will fail. That's why for testing `npm` is recommended. If you are using pnpm, you can switch to npm with:
 
 ```bash
 pnpm run use-npm
@@ -180,11 +341,30 @@ src/
 ├── utils/               # Utility functions and data structures
 ├── db/                  # Database abstraction layer
 │   ├── interfaces/      # Database interface definitions
-│   ├── index.ts         # EizenMemory implementation
-│   └── operations/      # Database operation modules
+│   ├── common/          # Common database utilities
+│   └── index.ts         # EizenMemory implementation
 ├── codec.ts             # Protobuf encoding/decoding
 └── index.ts             # Main exports
+
+docs/                    # Additional documentation
+├── BACKEND_INTEGRATION_GUIDE.md  # Backend integration examples
+├── DEVELOPER_GUIDE.md             # Development guidelines
+└── HNSW_GUIDE.md                  # HNSW algorithm details
+
+test/                    # Test suite
+├── *.test.ts           # Unit and integration tests
+├── data/               # Test data and fixtures
+├── db/                 # Database test utilities
+└── python/             # Python reference implementation
 ```
+
+## Documentation
+
+For detailed information, check out our comprehensive guides:
+
+- **[HNSW Guide](docs/HNSW_GUIDE.md)**: Deep dive into the HNSW algorithm implementation
+- **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Development setup and contribution guidelines
+- **[Backend Integration Guide](docs/BACKEND_INTEGRATION_GUIDE.md)**: Examples for integrating with different backends
 
 ## References
 
@@ -210,4 +390,4 @@ We welcome contributions! Please see our contributing guidelines:
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
