@@ -1,9 +1,24 @@
 {
 	"name": "eizen",
-	"version": "1.0.0",
-	"description": "Vector database backend Engine lib for ArchiveNet",
-	"main": "dist/index.js",
+	"version": "0.1.0",
+	"description": "Vector database Engine for ArchiveNET",
+	"main": "lib/index.cjs",
+	"module": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./lib/index.d.ts",
+				"default": "./lib/index.js"
+			},
+			"require": {
+				"types": "./lib/index.d.cts",
+				"default": "./lib/index.cjs"
+			}
+		}
+	},
+	"files": ["lib", "proto", "README.md", "package.json"],
 	"scripts": {
 		"build": "tsdown",
 		"test": "vitest",
@@ -23,9 +38,28 @@
 		"use-npm": "rm -f pnpm-lock.yaml && rm -rf node_modules && npm install",
 		"use-pnpm": "rm -f package-lock.json && rm -rf node_modules && pnpm install"
 	},
-	"keywords": [],
+	"keywords": [
+		"vector-database",
+		"hnsw",
+		"arweave",
+		"blockchain",
+		"similarity-search",
+		"machine-learning",
+		"nearest-neighbor",
+		"embeddings",
+		"nodejs",
+		"typescript"
+	],
 	"author": "Agasta",
-	"license": "ISC",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Itz-Agasta/Eizendb.git"
+	},
+	"homepage": "https://github.com/Itz-Agasta/Eizendb#readme",
+	"bugs": {
+		"url": "https://github.com/Itz-Agasta/Eizendb/issues"
+	},
 	"packageManager": "pnpm@10.11.0",
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
