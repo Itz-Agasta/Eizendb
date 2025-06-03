@@ -1,5 +1,6 @@
 {
 	"cSpell.words": [
+		"addgroup",
 		"arlocal",
 		"Arweave",
 		"datas",
@@ -17,6 +18,7 @@
 		"mdist",
 		"metadatas",
 		"numpy",
+		"originalname",
 		"Parallelizable",
 		"pbjs",
 		"pbts",
@@ -27,6 +29,7 @@
 		"tsdown",
 		"usize",
 		"vectordb",
+		"vitest",
 		"wscript",
 		"Yashunin"
 	]

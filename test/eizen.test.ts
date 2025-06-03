@@ -145,7 +145,18 @@ describe("Eizen Vector", () => {
 		}
 	});
 
-	test("get vector", async () => {});
+	test("get vector", async () => {
+		if (!vectordb) {
+			throw new Error("vectordb not initialized - beforeAll setup failed");
+		}
+
+		// Test getting the first inserted vector
+		const result = await vectordb.get_vector(0);
+
+		expect(result.point).toEqual(train[0]);
+		expect(result.metadata).toEqual(metadatas[0]);
+		expect(result.metadata?.id).toBe(0);
+	});
 
 	afterAll(async () => {
 		if (vectordb?.sdk) {

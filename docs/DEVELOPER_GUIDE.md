@@ -55,30 +55,44 @@ npm install hollowdb warp-contracts warp-contracts-plugin-deploy
 ```typescript
 import { EizenDbVector, EizenCompatSDK } from "eizen";
 import { SetSDK } from "hollowdb";
-import { WarpFactory } from "warp-contracts";
+import { WarpFactory, defaultCacheOptions } from "warp-contracts";
+import { Redis } from "ioredis";
+import { RedisCache } from "warp-contracts-redis";
+import { readFileSync } from "fs";
 
-// 1. Setup Warp and contract SDK
-const warp = WarpFactory.forMainnet();
-const contractTxId = "your-contract-transaction-id";
-const wallet = await getYourWallet(); // Your Arweave wallet
+// 1. Connect to Redis (optional for caching)
+const redis = new Redis();
+
+// 2. Setup Warp with Redis cache
+const warp = WarpFactory.forMainnet().useKVStorageFactory(
+  (contractTxId: string) =>
+    new RedisCache(
+      { ...defaultCacheOptions, dbLocation: `${contractTxId}` },
+      { client: redis }
+    )
+);
+
+// 3. Load wallet and create SDK
+const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
+const contractTxId = "your-contract-tx-id";
 const sdk = new SetSDK<string>(wallet, contractTxId, warp);
 
-// 2. Create vector database instance
-const vectorDb = new EizenDbVector<YourMetadataType>(sdk, {
+// 4. Create vector database instance with advanced HNSW parameters
+const vectordb = new EizenDbVector<YourMetadataType>(sdk, {
   m: 16, // Connections per node
   efConstruction: 200, // Build quality
   efSearch: 50, // Search quality
 });
 
-// 3. Insert vectors with metadata
-await vectorDb.insert([0.1, 0.2, 0.3, 0.4], {
+// 5. Insert vectors with metadata
+await vectordb.insert([0.1, 0.2, 0.3, 0.4], {
   id: "doc1",
   title: "Research Paper",
   category: "machine-learning",
 });
 
-// 4. Search for similar vectors
-const results = await vectorDb.knn_search([0.15, 0.25, 0.35, 0.45], 5);
+// 6. Search for similar vectors
+const results = await vectordb.knn_search([0.15, 0.25, 0.35, 0.45], 5);
 ```
 
 ### Contract Deployment
@@ -86,10 +100,11 @@ const results = await vectorDb.knn_search([0.15, 0.25, 0.35, 0.45], 5);
 ```typescript
 import { EizenDbVector } from "eizen";
 import { WarpFactory } from "warp-contracts";
+import { readFileSync } from "fs";
 
 // Deploy a new vector storage contract
 const warp = WarpFactory.forMainnet();
-const wallet = await getYourWallet();
+const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
 
 const { contractTxId, srcTxId } = await EizenDbVector.deploy(wallet, warp);
 console.log(`Contract deployed: ${contractTxId}`);

@@ -141,7 +141,9 @@ export class EizenDbVector<M = unknown> extends HNSW<M> {
 	 *
 	 * @example
 	 * ```typescript
-	 * const wallet = await getWallet(); // Your Arweave wallet
+	 * import { readFileSync } from "fs";
+	 *
+	 * const wallet = JSON.parse(readFileSync("./path/to/wallet.json", "utf-8"));
 	 * const warp = WarpFactory.forMainnet();
 	 *
 	 * const { contractTxId, srcTxId } = await EizenDbVector.deploy(wallet, warp);
