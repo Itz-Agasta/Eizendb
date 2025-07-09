@@ -12,6 +12,8 @@ Eizen is a high-performance vector database engine for ArchiveNET built on Arwea
 - **Metadata Support**: Rich metadata attachment to vectors for enhanced search capabilities
 - **Flexible Interface**: Database-agnostic interface supporting multiple storage backends
 - **Scalable**: Handles millions of high-dimensional vectors efficiently
+![eizen](https://github.com/user-attachments/assets/bcd3ac13-69d6-489c-9908-b6552295e55f)
+
 
 ## HNSW Implementation
 
